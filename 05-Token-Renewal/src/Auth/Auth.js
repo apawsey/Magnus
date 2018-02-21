@@ -1,6 +1,8 @@
 import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
 import history from '../history';
+import { API_URL } from './../constants';
+import axios from 'axios';
 
 export default class Auth {
   userProfile;
@@ -33,6 +35,7 @@ export default class Auth {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
+        this.getApplicationUserProfile(authResult);
         history.replace('/home');
       } else if (err) {
         history.replace('/home');
@@ -57,6 +60,15 @@ export default class Auth {
 
     // navigate to the home route
     history.replace('/home');
+  }
+
+  getApplicationUserProfile(authResult) {
+    const headers = { 'Authorization': `Bearer ${authResult.accessToken}`}
+    axios.get(`${API_URL}/createorgetuser`, { headers })
+    .then(response => {
+      localStorage.setItem('internalUserId', response.data.internalUserId);
+    })
+    .catch(error => alert(error));
   }
 
   getAccessToken() {

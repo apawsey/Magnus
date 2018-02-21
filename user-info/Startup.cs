@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPIApplication
 {
@@ -34,6 +35,8 @@ namespace WebAPIApplication
 
             // Add framework services.
             services.AddMvc();
+
+            services.AddDbContext<ApplicationDbContext>(builder => builder.UseInMemoryDatabase("application"));
 
             string domain = $"https://{Configuration["Auth0:Domain"]}/";
             services.AddAuthentication(options =>

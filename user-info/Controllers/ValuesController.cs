@@ -22,10 +22,12 @@ namespace WebAPIApplication.Controllers
     public class ValuesController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _applicationDbContext;
 
-        public ValuesController(IConfiguration configuration)
+        public ValuesController(IConfiguration configuration, ApplicationDbContext applicationDbContext)
         {
             _configuration = configuration;
+            _applicationDbContext = applicationDbContext;
         }
 
         [HttpGet]
@@ -93,6 +95,23 @@ namespace WebAPIApplication.Controllers
                 Type = c.Type,
                 Value = c.Value
             });
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("createorgetuser")]
+        public IActionResult CreateOtGetUser()
+        {
+            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            User user = _applicationDbContext.Users.SingleOrDefault(x => x.UserId == userId);
+            if (user == null)
+            {
+                user = new User(userId);
+                _applicationDbContext.Users.Add(user);
+                _applicationDbContext.SaveChanges();
+            }
+
+            return Ok(user);
         }
     }
 }
